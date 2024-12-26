@@ -4,7 +4,10 @@
 - プレイヤーは面の位置と角度を変えることができる
 
 ## 操作方法
-![](https://github.com/RyoyaMaejima/DirectXPhysics/blob/main/ReadmeSrc/HowToPlay.png)
+- 十字キー：移動
+- WASD：回転
+- Cキー：ゲーム開始
+- Xキー：初期配置に戻す
 
 ## プレイ動画
 プレイ動画は下記リンクに記載しています  
