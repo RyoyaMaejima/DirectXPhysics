@@ -4,10 +4,10 @@
 - プレイヤーは面の位置と角度を変えることができる
 
 ## 操作方法
-
+![](https://github.com/RyoyaMaejima/DirectXPhysics/blob/main/ReadmeSrc/HowToPlay.png)
 
 ## プレイ動画
-プレイ動画は下記リンクに記載しています
+プレイ動画は下記リンクに記載しています  
 
 
 
@@ -17,11 +17,11 @@
 ## 開発環境・体制
 - 個人開発
 - 期間：１ヶ月
-- 仕様ツール：DirectX12
+- 使用ツール：DirectX12
 
 ## ディレクトリ構成
-Source内にソースコード一式を載せています。  
-以下が各ファイルの説明。
+Source内にソースコード一式を載せています  
+以下が各ファイルの説明
 
 - Application：DirectXにおける基本的な機能を管理するスクリプト
 - BasicPixelShader：ピクセルシェーダー
