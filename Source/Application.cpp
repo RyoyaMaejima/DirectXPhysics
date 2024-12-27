@@ -86,15 +86,15 @@ bool Application::Init() {
 	}
 
 	//頂点とインデックスのバッファービュー作成
-	if (FAILED(CreateVertexAndIndexBufferView(0, _sVertBuff, _sVbView, _sIdxBuff, _sIbView))) {
+	if (FAILED(CreateVertexAndIndexBufferView(_sVertices[0].id, _sVertBuff, _sVbView, _sIdxBuff, _sIbView))) {
 		assert(0);
 		return false;
 	}
-	if (FAILED(CreateVertexAndIndexBufferView(1, _fVertBuff, _fVbView, _fIdxBuff, _fIbView))) {
+	if (FAILED(CreateVertexAndIndexBufferView(_fVertices[0].id, _fVertBuff, _fVbView, _fIdxBuff, _fIbView))) {
 		assert(0);
 		return false;
 	}
-	if (FAILED(CreateVertexAndIndexBufferView(2, _tVertBuff, _tVbView, _tIdxBuff, _tIbView))) {
+	if (FAILED(CreateVertexAndIndexBufferView(_tVertices[0].id, _tVertBuff, _tVbView, _tIdxBuff, _tIbView))) {
 		assert(0);
 		return false;
 	}
