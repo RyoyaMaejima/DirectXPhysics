@@ -152,14 +152,14 @@ private:
 	//アニメーションするか
 	bool isAnim = false;
 
+	//頂点データの初期化
+	void InitiallizeVertexData();
+
 	//キー入力受け取り
 	void Input();
 
 	//アニメーション入力受け取り
 	void AnimInput();
-
-	//頂点データの初期化
-	void InitiallizeVertexData();
 
 	//ウィンドウ作成
 	void CreateGameWindow();
@@ -178,7 +178,7 @@ private:
 
 	//頂点とインデックスのバッファービュー作成
 	HRESULT CreateVertexAndIndexBufferView(
-		int id,
+		figure_id id,
 		ComPtr<ID3D12Resource>& vertBuff,
 		D3D12_VERTEX_BUFFER_VIEW& vbView,
 		ComPtr<ID3D12Resource>& idxBuff,

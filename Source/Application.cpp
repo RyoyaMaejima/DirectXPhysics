@@ -271,6 +271,35 @@ void Application::Terminate() {
 	UnregisterClass(_windowClass.lpszClassName, _windowClass.hInstance);
 }
 
+void Application::InitiallizeVertexData() {
+	//球初期化
+	sphere = Sphere::Instance();
+	sphere.Init(_sVertices, _sIndices);
+	for (int i = 0; i < sVertNum; i++) {
+		_sVertices[i].uv = { 0.0f, 0.0f };
+		_sVertices[i].id = sphere_id;
+	}
+
+	//面初期化
+	face = Face::Instance();
+	face.Init(_fVertices, _fIndices);
+	for (int i = 0; i < fVertNum; i++) {
+		_fVertices[i].uv = { 0.0f, 0.0f };
+		_fVertices[i].id = face_id;
+	}
+
+	//テクスチャ初期化
+	//頂点座標の初期化
+	_tVertices[0] = { { -4.0f, -2.0f, 0.0f }, { 0.0f, 1.0f}, texture_id };
+	_tVertices[1] = { { -4.0f,  2.0f, 0.0f }, { 0.0f, 0.0f}, texture_id };
+	_tVertices[2] = { {  4.0f, -2.0f, 0.0f }, { 1.0f, 1.0f}, texture_id };
+	_tVertices[3] = { {  4.0f,  2.0f, 0.0f }, { 1.0f, 0.0f}, texture_id };
+
+	//インデックス座標の初期化
+	_tIndices[0] = 0; _tIndices[1] = 1; _tIndices[2] = 2;
+	_tIndices[3] = 2; _tIndices[4] = 1; _tIndices[5] = 3;
+}
+
 void Application::Input() {
 	if (GetAsyncKeyState(VK_UP) & 0x8000) {
 		state = move_up;
@@ -316,35 +345,6 @@ void Application::AnimInput() {
 		//アニメーションフラグを上げる
 		isAnim = true;
 	}
-}
-
-void Application::InitiallizeVertexData() {
-	//球初期化
-	sphere = Sphere::Instance();
-	sphere.Init(_sVertices, _sIndices);
-	for (int i = 0; i < sVertNum; i++) {
-		_sVertices[i].uv = { 0.0f, 0.0f };
-		_sVertices[i].id = 0;
-	}
-
-	//面初期化
-	face = Face::Instance();
-	face.Init(_fVertices, _fIndices);
-	for (int i = 0; i < fVertNum; i++) {
-		_fVertices[i].uv = { 0.0f, 0.0f };
-		_fVertices[i].id = 1;
-	}
-
-	//テクスチャ初期化
-	//頂点座標の初期化
-	_tVertices[0] = { { -4.0f, -2.0f, 0.0f }, { 0.0f, 1.0f}, 2 };
-	_tVertices[1] = { { -4.0f,  2.0f, 0.0f }, { 0.0f, 0.0f}, 2 };
-	_tVertices[2] = { {  4.0f, -2.0f, 0.0f }, { 1.0f, 1.0f}, 2 };
-	_tVertices[3] = { {  4.0f,  2.0f, 0.0f }, { 1.0f, 0.0f}, 2 };
-
-	//インデックス座標の初期化
-	_tIndices[0] = 0; _tIndices[1] = 1; _tIndices[2] = 2;
-	_tIndices[3] = 2; _tIndices[4] = 1; _tIndices[5] = 3;
 }
 
 void Application::CreateGameWindow() {
@@ -488,7 +488,7 @@ HRESULT	Application::CreateRenderTargetView() {
 }
 
 HRESULT Application::CreateVertexAndIndexBufferView(
-	int id,
+	figure_id id,
 	ComPtr<ID3D12Resource>& vertBuff,
 	D3D12_VERTEX_BUFFER_VIEW& vbView,
 	ComPtr<ID3D12Resource>& idxBuff,
@@ -496,11 +496,11 @@ HRESULT Application::CreateVertexAndIndexBufferView(
 
 	UINT64 vSize = 0;//全バイト数
 	UINT64 vStride = 0;//1頂点あたりのバイト数
-	if (id == 0) {
+	if (id == sphere_id) {
 		vSize = sizeof(_sVertices);
 		vStride = sizeof(_sVertices[0]);
 	}
-	else if (id == 1){
+	else if (id == face_id){
 		vSize = sizeof(_fVertices);
 		vStride = sizeof(_fVertices[0]);
 	}
@@ -525,10 +525,10 @@ HRESULT Application::CreateVertexAndIndexBufferView(
 	Vertex* vertMap = nullptr;
 	result = vertBuff->Map(0, nullptr, (void**)&vertMap);
 	if (FAILED(result)) { return result; }
-	if (id == 0) {
+	if (id == sphere_id) {
 		copy(begin(_sVertices), end(_sVertices), vertMap);
 	}
-	else if (id == 1) {
+	else if (id == face_id) {
 		copy(begin(_fVertices), end(_fVertices), vertMap);
 	}
 	else {
@@ -542,10 +542,10 @@ HRESULT Application::CreateVertexAndIndexBufferView(
 	vbView.StrideInBytes = vStride;
 
 	UINT64 iSize = 0;//全バイト数
-	if (id == 0) {
+	if (id == sphere_id) {
 		iSize = sizeof(_sIndices);
 	}
-	else if (id == 1) {
+	else if (id == face_id) {
 		iSize = sizeof(_fIndices);
 	}
 	else {
@@ -567,10 +567,10 @@ HRESULT Application::CreateVertexAndIndexBufferView(
 	unsigned short* mappedIdx = nullptr;
 	result = idxBuff->Map(0, nullptr, (void**)&mappedIdx);
 	if (FAILED(result)) { return result; }
-	if (id == 0) {
+	if (id == sphere_id) {
 		copy(begin(_sIndices), end(_sIndices), mappedIdx);
 	}
-	else if (id == 1) {
+	else if (id == face_id) {
 		copy(begin(_fIndices), end(_fIndices), mappedIdx);
 	}
 	else {

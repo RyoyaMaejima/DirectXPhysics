@@ -5,11 +5,33 @@
 using namespace std;
 using namespace DirectX;
 
+//図形ID
+enum figure_id
+{
+	sphere_id,
+	face_id,
+	texture_id
+};
+
 //頂点構造体
 struct Vertex {
 	XMFLOAT3 pos;
 	XMFLOAT2 uv;
-	unsigned int id;
+	figure_id id;
+};
+
+//入力状態
+enum einput_state
+{
+	move_up,
+	move_down,
+	move_right,
+	move_left,
+	rotateX_positive,
+	rotateX_negative,
+	rotateZ_positive,
+	rotateZ_negative,
+	invalid
 };
 
 //球データ

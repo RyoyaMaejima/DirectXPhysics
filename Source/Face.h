@@ -1,19 +1,6 @@
 #pragma once
 #include "VertexData.h"
 
-enum einput_state
-{
-	move_up,
-	move_down,
-	move_right,
-	move_left,
-	rotateX_positive,
-	rotateX_negative,
-	rotateZ_positive,
-	rotateZ_negative,
-	invalid
-};
-
 class Face {
 public:
 	//Faceのシングルトンインスタンスを得る
