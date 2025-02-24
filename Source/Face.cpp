@@ -144,19 +144,53 @@ Face::~Face() {
 }
 
 void Face::CreateFace() {
+	const float dx = (2 * w) / colNum;
+	const float dy = (2 * w) / rowNum;
+
 	//頂点座標の設定
-	_vertices[0] = { -w, -w, 0.0f };
-	_vertices[1] = { -w,  w, 0.0f };
-	_vertices[2] = {  w, -w, 0.0f };
-	_vertices[3] = {  w,  w, 0.0f };
+	int index = 0;
+	for (int row = 0; row <= rowNum; row++) {
+		for (int col = 0; col <= colNum; col++) {
+			float x = -w + col * dx;
+			float y = -w + row * dy;
+			_vertices[index] = { x, y, 0.0f };
+
+			//法線ベクトルの設定
+			_normals[index] = { 0.0f, 0.0f, -1.0f };
+
+			index++;
+		}
+	}
 
 	//インデックス座標の設定
-	_indices[0] = 0; _indices[1] = 1; _indices[2] = 2;
-	_indices[3] = 2; _indices[4] = 1; _indices[5] = 3;
+	index = 0;
+	for (int row = 0; row < rowNum; row++) {
+		for (int col = 0; col < colNum; col++) {
+			int topLeft = row * (colNum + 1) + col;
+			int topRight = topLeft + 1;
+			int bottomLeft = (row + 1) * (colNum + 1) + col;
+			int bottomRight = bottomLeft + 1;
+
+			_indices[index] = topLeft;
+			index++;
+			_indices[index] = topRight;
+			index++;
+			_indices[index] = bottomLeft;
+			index++;
+
+			_indices[index] = topRight;
+			index++;
+			_indices[index] = bottomRight;
+			index++;
+			_indices[index] = bottomLeft;
+			index++;
+		}
+	}
 }
 
 void Face::CopyVertex(Vertex* vertices) {
 	for (int i = 0; i < fVertNum; i++) {
 		vertices[i].pos = _vertices[i];
+		vertices[i].normal = _normals[i];
 	}
 }

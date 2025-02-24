@@ -16,8 +16,9 @@ public:
 private:
 	//値渡し用
 	XMFLOAT3 _vertices[sVertNum] = {};//頂点座標
+	XMFLOAT3 _normals[sVertNum] = {};//法線ベクトル
 	unsigned int _indices[sIndicesNum] = {};//インデックス座標
-	XMFLOAT3 _fVertices[fVertNum] = {};//面の座標
+	XMFLOAT3 _fCorners[4] = {};//面の四隅
 
 	//パラメータ
 	float r = 0.5f;//半径

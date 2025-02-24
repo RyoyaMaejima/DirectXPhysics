@@ -73,8 +73,7 @@ private:
 	ComPtr<ID3DBlob> _psBlob = nullptr;
 
 	//パイプラインステート
-	ComPtr<ID3D12PipelineState> _tPipelinestate = nullptr;//テクスチャ用
-	ComPtr<ID3D12PipelineState> _zPipelinestate = nullptr;//図形用
+	ComPtr<ID3D12PipelineState> _pipelinestate = nullptr;
 
 	//ルートシグネチャ
 	ComPtr<ID3D12RootSignature> _rootsignature = nullptr;
@@ -116,50 +115,43 @@ private:
 	ComPtr<ID3D12DescriptorHeap> _basicDescHeap = nullptr;
 
 	//座標変換系行列
-	XMMATRIX _viewMat;
-	XMMATRIX _projMat;
+	struct MatricesData {
+		XMMATRIX world;
+		XMMATRIX viewproj;
+	};
 
 	//球
 	XMMATRIX _sWorldMat;
-	XMMATRIX* _sMapMatrix;
+	MatricesData* _sMapMatrix;
 
 	//面
 	XMMATRIX _fWorldMat;
-	XMMATRIX* _fMapMatrix;
+	MatricesData* _fMapMatrix;
 
 	//テクスチャ
 	XMMATRIX _tWorldMat;
-	XMMATRIX* _tMapMatrix;
+	MatricesData* _tMapMatrix;
 
 	//深度関係
 	ComPtr<ID3D12Resource> _depthBuff = nullptr;//深度バッファー
 	ComPtr<ID3D12DescriptorHeap> _dsvHeap = nullptr;//深度バッファ用ディスクリプタヒープ
 
 	//時間計測用
-	LARGE_INTEGER frequency;//周波数
-	LARGE_INTEGER prevTime;//1つ前の時刻
-	LARGE_INTEGER currentTime;//現在の時刻
+	LARGE_INTEGER _frequency;//周波数
+	LARGE_INTEGER _prevTime;//1つ前の時刻
+	LARGE_INTEGER _currentTime;//現在の時刻
 
 	//球
-	Sphere sphere;
+	Sphere _sphere;
 
 	//面
-	Face face;
+	Face _face;
 
 	//入力変数
-	einput_state state;
+	einput_state _state;
 
 	//アニメーションするか
-	bool isAnim = false;
-
-	//頂点データの初期化
-	void InitiallizeVertexData();
-
-	//キー入力受け取り
-	void Input();
-
-	//アニメーション入力受け取り
-	void AnimInput();
+	bool _isAnim = false;
 
 	//ウィンドウ作成
 	void CreateGameWindow();
@@ -182,13 +174,14 @@ private:
 		ComPtr<ID3D12Resource>& vertBuff,
 		D3D12_VERTEX_BUFFER_VIEW& vbView,
 		ComPtr<ID3D12Resource>& idxBuff,
-		D3D12_INDEX_BUFFER_VIEW& ibView);
+		D3D12_INDEX_BUFFER_VIEW& ibView
+	);
 
 	//シェーダーファイル読み込み
 	HRESULT LoadShaderFile();
 
 	//グラフィックスパイプラインステート作成
-	HRESULT CreateGraphicsPipelineState(bool isTex, ComPtr<ID3D12PipelineState>& pipelinestate);
+	HRESULT CreateGraphicsPipelineState();
 
 	//ルートシグネチャ作成
 	HRESULT CreateRootSignature();
@@ -198,14 +191,25 @@ private:
 
 	//定数バッファー作成
 	HRESULT CreateConstBuffer(
+		figure_id id,
 		ComPtr<ID3D12Resource>& constBuff,
-		XMMATRIX& worldMat);
+		XMMATRIX& worldMat
+	);
 
 	//テクスチャと定数用ディスクリプタヒープ作成
 	HRESULT CreateBasicDescHeap();
 
 	//深度バッファービュー作成
 	HRESULT CreateDepthStencilView();
+
+	//頂点データの初期化
+	void InitiallizeVertexData();
+
+	//キー入力受け取り
+	void Input();
+
+	//アニメーション入力受け取り
+	void AnimInput();
 
 	//シングルトンのためにコンストラクタをprivateに
 	//さらにコピーと代入を禁止に

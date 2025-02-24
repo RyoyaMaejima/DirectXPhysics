@@ -16,6 +16,7 @@ public:
 private:
 	//値渡し用
 	XMFLOAT3 _vertices[fVertNum] = {};//頂点座標
+	XMFLOAT3 _normals[fVertNum] = {};//法線ベクトル
 	unsigned int _indices[fIndicesNum] = {};//インデックス座標
 
 	//パラメータ

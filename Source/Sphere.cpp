@@ -31,8 +31,8 @@ void Sphere::Update(float deltaTime, XMMATRIX& worldMat, Vertex* fVertices) {
 	XMFLOAT3 move = { 0.0f, 0.0f, 0.0f };
 
 	//面の座標を受け取る
-	for (int i = 0; i < fVertNum; i++) {
-		_fVertices[i] = fVertices[i].pos;
+	for (int i = 0; i < 4; i++) {
+		_fCorners[i] = fVertices[fCornerNums[i]].pos;
 	}
 
 	//ぶつかったとき
@@ -79,8 +79,11 @@ void Sphere::CreateSphere() {
 			float x = r * static_cast<float>(sin(latTheta) * cos(lonTheta));
 			float y = r * static_cast<float>(cos(latTheta));
 			float z = r * static_cast<float>(sin(latTheta) * sin(lonTheta));
-
 			_vertices[index] = { x, y, z };
+
+			//法線ベクトルの設定
+			_normals[index] = NormalizeVector(_vertices[index]);
+
 			index++;
 		}
 	}
@@ -112,12 +115,13 @@ void Sphere::CreateSphere() {
 void Sphere::CopyVertex(Vertex* vertices) {
 	for (int i = 0; i < sVertNum; i++) {
 		vertices[i].pos = _vertices[i];
+		vertices[i].normal = _normals[i];
 	}
 }
 
 bool Sphere::Collision() {
 	bool isEdge = false;
-	XMFLOAT3 vfnp = CalcFaceNearestPoint(center, _fVertices[0], _fVertices[1], _fVertices[2], _fVertices[3], isEdge);//最近点を取得
+	XMFLOAT3 vfnp = CalcFaceNearestPoint(center, _fCorners[0], _fCorners[1], _fCorners[2], _fCorners[3], isEdge);//最近点を取得
 	return CalcDistance(center,vfnp) <= r;
 }
 
@@ -127,13 +131,13 @@ void Sphere::Fall() {
 
 void Sphere::Bound() {
 	bool isEdge = false;
-	XMFLOAT3 vfnp = CalcFaceNearestPoint(center, _fVertices[0], _fVertices[1], _fVertices[2], _fVertices[3], isEdge);//最近点を取得
+	XMFLOAT3 vfnp = CalcFaceNearestPoint(center, _fCorners[0], _fCorners[1], _fCorners[2], _fCorners[3], isEdge);//最近点を取得
 	XMFLOAT3 n;//衝突の法線ベクトル
 
 	//面に衝突したとき
 	if (!isEdge) {
-		XMFLOAT3 fV01 = SubVector(_fVertices[1], _fVertices[0]);
-		XMFLOAT3 fV02 = SubVector(_fVertices[2], _fVertices[0]);
+		XMFLOAT3 fV01 = SubVector(_fCorners[1], _fCorners[0]);
+		XMFLOAT3 fV02 = SubVector(_fCorners[2], _fCorners[0]);
 		n = CrossVector(fV01, fV02);//面の法線ベクトル
 	}
 	//辺や角に衝突したとき
@@ -156,6 +160,6 @@ void Sphere::Bound() {
 
 float Sphere::PenDepth() {
 	bool isEdge = false;
-	XMFLOAT3 vfnp = CalcFaceNearestPoint(center, _fVertices[0], _fVertices[1], _fVertices[2], _fVertices[3], isEdge);//最近点を取得
+	XMFLOAT3 vfnp = CalcFaceNearestPoint(center, _fCorners[0], _fCorners[1], _fCorners[2], _fCorners[3], isEdge);//最近点を取得
 	return r - CalcDistance(center, vfnp);
 }
