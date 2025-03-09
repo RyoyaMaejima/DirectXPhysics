@@ -1,7 +1,7 @@
 #include "PMDActor.h"
 #include "XMFLOAT3Math.h"
 
-///ï¿½ï¿½ï¿½fï¿½ï¿½ï¿½Ìƒpï¿½Xï¿½Æƒeï¿½Nï¿½Xï¿½`ï¿½ï¿½ï¿½Ìƒpï¿½Xï¿½ï¿½ï¿½ç‡ï¿½ï¿½ï¿½pï¿½Xï¿½ğ“¾‚ï¿½
+///ƒ‚ƒfƒ‹‚ÌƒpƒX‚ÆƒeƒNƒXƒ`ƒƒ‚ÌƒpƒX‚©‚ç‡¬ƒpƒX‚ğ“¾‚é
 string GetTexturePathFromModelAndTexPath(const string& modelPath, const char* texPath) {
 	int pathIndex1 = modelPath.rfind('/');
 	int pathIndex2 = modelPath.rfind('\\');
@@ -16,7 +16,7 @@ PMDActor& PMDActor::Instance() {
 }
 
 void PMDActor::Init() {
-	//PMDï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½Ç‚İï¿½ï¿½ï¿½
+	//PMDƒtƒ@ƒCƒ‹“Ç‚İ‚İ
 	if (FAILED(LoadPMDFile())) {
 		assert(0);
 	}
@@ -25,23 +25,23 @@ void PMDActor::Init() {
 		_vertData[i].id = pmdActor_id;
 	}
 
-	//ï¿½{ï¿½[ï¿½ï¿½ï¿½Ìï¿½ï¿½ï¿½ï¿½İ’ï¿½
+	//ƒ{[ƒ“‚Ì‰Šúİ’è
 	fill(_boneMatrices.begin(), _boneMatrices.end(), XMMatrixIdentity());
 }
 
 void PMDActor::Begin() {
-	//ï¿½eï¿½Ïï¿½ï¿½Ìï¿½ï¿½ï¿½ï¿½ï¿½
+	//Še•Ï”‚Ì‰Šú‰»
 	_worldMat = XMMatrixIdentity();
 	fill(_boneMatrices.begin(), _boneMatrices.end(), XMMatrixIdentity());
 
-	//ï¿½ï¿½ï¿½ÌƒZï¿½bï¿½g
+	//‘«‚ÌƒZƒbƒg
 	_isLeftLeg = true;
 	SetLeg();
 
-	//ï¿½ï¿½ï¿½Wï¿½Ìï¿½ï¿½ï¿½ï¿½İ’ï¿½
+	//À•W‚Ì‰Šúİ’è
 	_worldMat *= XMMatrixTranslation(_defPos.x, _defPos.y, _defPos.z);
 
-	//ï¿½ï¿½]ï¿½Ìï¿½ï¿½ï¿½ï¿½İ’ï¿½
+	//‰ñ“]‚Ì‰Šúİ’è
 	RotateLeg(_defRotLeftLeg, _defRotLeftKnee, _defRotLeftAnkle);
 }
 
@@ -50,7 +50,7 @@ void PMDActor::Update(float deltaTime, einput_state state) {
 	XMFLOAT3 move = { 0.0f, 0.0f, 0.0f };
 	XMFLOAT3 rot = { 0.0f, 0.0f, 0.0f };
 
-	//ï¿½ï¿½ï¿½Íï¿½ï¿½ï¿½
+	//“ü—Íˆ—
 	switch (state)
 	{
 	case move_up:
@@ -91,7 +91,7 @@ void PMDActor::Update(float deltaTime, einput_state state) {
 		break;
 	}
 
-	//ï¿½ï¿½]
+	//‰ñ“]
 	if (_isLeftLeg) {
 		RotateLeg(AddVector(_defRotLeftLeg, _theta), _defRotLeftKnee, _defRotLeftAnkle);
 	}
@@ -99,7 +99,7 @@ void PMDActor::Update(float deltaTime, einput_state state) {
 		RotateLeg(AddVector(_defRotRightLeg, _theta), _defRotRightKnee, _defRotRightAnkle);
 	}
 
-	//ï¿½Ú“ï¿½
+	//ˆÚ“®
 	_worldMat *= XMMatrixTranslation(move.x, move.y, move.z);
 }
 
@@ -112,101 +112,101 @@ PMDActor::~PMDActor() {
 }
 
 HRESULT PMDActor::LoadPMDFile() {
-	//PMDï¿½wï¿½bï¿½_ï¿½\ï¿½ï¿½ï¿½ï¿½
+	//PMDƒwƒbƒ_\‘¢‘Ì
 	struct PMDHeader {
 		float version;
-		char model_name[20];//ï¿½ï¿½ï¿½fï¿½ï¿½ï¿½ï¿½
-		char comment[256];//ï¿½ï¿½ï¿½fï¿½ï¿½ï¿½Rï¿½ï¿½ï¿½ï¿½ï¿½g
+		char model_name[20];//ƒ‚ƒfƒ‹–¼
+		char comment[256];//ƒ‚ƒfƒ‹ƒRƒƒ“ƒg
 	};
 	char signature[3];
 	PMDHeader pmdheader = {};
 
-	//PMDï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½Ç‚İï¿½ï¿½ï¿½
-	string strModelPath = "Model/ï¿½ï¿½ï¿½ï¿½ï¿½~ï¿½N.pmd";
+	//PMDƒtƒ@ƒCƒ‹“Ç‚İ‚İ
+	string strModelPath = "Model/‰‰¹ƒ~ƒN.pmd";
 	auto fp = fopen(strModelPath.c_str(), "rb");
 	if (fp == nullptr) {
-		//ï¿½Gï¿½ï¿½ï¿½[ï¿½ï¿½ï¿½ï¿½
+		//ƒGƒ‰[ˆ—
 		return ERROR_FILE_NOT_FOUND;
 	}
 	fread(signature, sizeof(signature), 1, fp);
 	fread(&pmdheader, sizeof(pmdheader), 1, fp);
 
 #pragma pack(1)
-	//PMDï¿½ï¿½ï¿½_ï¿½\ï¿½ï¿½ï¿½ï¿½
+	//PMD’¸“_\‘¢‘Ì
 	struct PMDVertex {
-		XMFLOAT3 pos;//ï¿½ï¿½ï¿½_ï¿½ï¿½ï¿½W
-		XMFLOAT3 normal;//ï¿½@ï¿½ï¿½ï¿½xï¿½Nï¿½gï¿½ï¿½
-		XMFLOAT2 uv;//uvï¿½ï¿½ï¿½W
-		unsigned short boneNo[2];//ï¿½{ï¿½[ï¿½ï¿½ï¿½Ôï¿½
-		unsigned char boneWeight;//ï¿½{ï¿½[ï¿½ï¿½ï¿½eï¿½ï¿½ï¿½x
-		unsigned char edgeFlg;//ï¿½ÖŠsï¿½ï¿½ï¿½tï¿½ï¿½ï¿½O
-	};//ï¿½ï¿½ï¿½v38ï¿½oï¿½Cï¿½g
+		XMFLOAT3 pos;//’¸“_À•W
+		XMFLOAT3 normal;//–@üƒxƒNƒgƒ‹
+		XMFLOAT2 uv;//uvÀ•W
+		unsigned short boneNo[2];//ƒ{[ƒ“”Ô†
+		unsigned char boneWeight;//ƒ{[ƒ“‰e‹¿“x
+		unsigned char edgeFlg;//—ÖŠsüƒtƒ‰ƒO
+	};//‡Œv38ƒoƒCƒg
 #pragma pack()
 
-	//ï¿½ï¿½ï¿½_ï¿½ï¿½ï¿½Ìæ“¾
+	//’¸“_”‚Ìæ“¾
 	unsigned int vertNum;
 	fread(&vertNum, sizeof(vertNum), 1, fp);
 
-	//ï¿½ï¿½ï¿½_ï¿½fï¿½[ï¿½^ï¿½Ìæ“¾
+	//’¸“_ƒf[ƒ^‚Ìæ“¾
 	vector<PMDVertex> vertData(vertNum);
 	fread(vertData.data(), vertData.size() * sizeof(PMDVertex), 1, fp);
 
-	//ï¿½Cï¿½ï¿½ï¿½fï¿½bï¿½Nï¿½Xï¿½ï¿½ï¿½Ìæ“¾
+	//ƒCƒ“ƒfƒbƒNƒX”‚Ìæ“¾
 	unsigned int indicesNum;
 	fread(&indicesNum, sizeof(indicesNum), 1, fp);
 
-	//ï¿½Cï¿½ï¿½ï¿½fï¿½bï¿½Nï¿½Xï¿½fï¿½[ï¿½^ï¿½Ìæ“¾
+	//ƒCƒ“ƒfƒbƒNƒXƒf[ƒ^‚Ìæ“¾
 	vector<unsigned short> indices(indicesNum);
 	fread(indices.data(), indices.size() * sizeof(indices[0]), 1, fp);
 
 #pragma pack(1)
-	//PMDï¿½}ï¿½eï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½\ï¿½ï¿½ï¿½ï¿½
+	//PMDƒ}ƒeƒŠƒAƒ‹\‘¢‘Ì
 	struct PMDMaterial {
-		XMFLOAT3 diffuse;//ï¿½fï¿½Bï¿½tï¿½ï¿½ï¿½[ï¿½Yï¿½F
-		float alpha;//ï¿½fï¿½Bï¿½tï¿½ï¿½ï¿½[ï¿½Yï¿½ï¿½
-		float specularity;//ï¿½Xï¿½yï¿½Lï¿½ï¿½ï¿½ï¿½ï¿½Ì‹ï¿½ï¿½ï¿½(ï¿½ï¿½Zï¿½l)
-		XMFLOAT3 specular;//ï¿½Xï¿½yï¿½Lï¿½ï¿½ï¿½ï¿½ï¿½F
-		XMFLOAT3 ambient;//ï¿½Aï¿½ï¿½ï¿½rï¿½Gï¿½ï¿½ï¿½gï¿½F
-		unsigned char toonIdx;//ï¿½gï¿½Dï¿½[ï¿½ï¿½ï¿½Ôï¿½
-		unsigned char edgeFlg;//ï¿½}ï¿½eï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½ï¿½ï¿½Ì—ÖŠsï¿½ï¿½ï¿½tï¿½ï¿½ï¿½O
-		//2ï¿½oï¿½Cï¿½gï¿½Ìƒpï¿½fï¿½Bï¿½ï¿½ï¿½O
-		unsigned int indicesNum;//ï¿½ï¿½ï¿½Ìƒ}ï¿½eï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½è“–ï¿½ï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½fï¿½bï¿½Nï¿½Xï¿½ï¿½
-		char texFilePath[20];//ï¿½eï¿½Nï¿½Xï¿½`ï¿½ï¿½ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½
-	};//ï¿½pï¿½fï¿½Bï¿½ï¿½ï¿½Oï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½é‚½ï¿½ßï¿½ï¿½v72ï¿½oï¿½Cï¿½g
+		XMFLOAT3 diffuse;//ƒfƒBƒtƒ…[ƒYF
+		float alpha;//ƒfƒBƒtƒ…[ƒYƒ¿
+		float specularity;//ƒXƒyƒLƒ…ƒ‰‚Ì‹­‚³(æZ’l)
+		XMFLOAT3 specular;//ƒXƒyƒLƒ…ƒ‰F
+		XMFLOAT3 ambient;//ƒAƒ“ƒrƒGƒ“ƒgF
+		unsigned char toonIdx;//ƒgƒD[ƒ“”Ô†
+		unsigned char edgeFlg;//ƒ}ƒeƒŠƒAƒ‹–ˆ‚Ì—ÖŠsüƒtƒ‰ƒO
+		//2ƒoƒCƒg‚ÌƒpƒfƒBƒ“ƒO
+		unsigned int indicesNum;//‚±‚Ìƒ}ƒeƒŠƒAƒ‹‚ªŠ„‚è“–‚½‚éƒCƒ“ƒfƒbƒNƒX”
+		char texFilePath[20];//ƒeƒNƒXƒ`ƒƒƒtƒ@ƒCƒ‹–¼
+	};//ƒpƒfƒBƒ“ƒO‚ª”­¶‚·‚é‚½‚ß‡Œv72ƒoƒCƒg
 #pragma pack()
 
-	//ï¿½}ï¿½eï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½ï¿½ï¿½Ìæ“¾
+	//ƒ}ƒeƒŠƒAƒ‹”‚Ìæ“¾
 	unsigned int materialNum;
 	fread(&materialNum, sizeof(materialNum), 1, fp);
 
-	//ï¿½}ï¿½eï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½fï¿½[ï¿½^ï¿½Ìæ“¾
+	//ƒ}ƒeƒŠƒAƒ‹ƒf[ƒ^‚Ìæ“¾
 	vector<PMDMaterial> materials(materialNum);
 	fread(materials.data(), materials.size() * sizeof(PMDMaterial), 1, fp);
 
 #pragma pack(1)
-	//ï¿½Ç‚İï¿½ï¿½İ—pï¿½{ï¿½[ï¿½ï¿½ï¿½\ï¿½ï¿½ï¿½ï¿½
+	//“Ç‚İ‚İ—pƒ{[ƒ“\‘¢‘Ì
 	struct PMDBone {
-		char boneName[20];//ï¿½{ï¿½[ï¿½ï¿½ï¿½ï¿½
-		unsigned short parentNo;//ï¿½eï¿½{ï¿½[ï¿½ï¿½ï¿½Ôï¿½
-		unsigned short nextNo;//ï¿½ï¿½[ï¿½Ìƒ{ï¿½[ï¿½ï¿½ï¿½Ôï¿½
-		unsigned char type;//ï¿½{ï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½
-		unsigned short ikBoneNo;//IKï¿½{ï¿½[ï¿½ï¿½ï¿½Ôï¿½
-		XMFLOAT3 pos;//ï¿½{ï¿½[ï¿½ï¿½ï¿½ÌŠî€ï¿½_ï¿½ï¿½ï¿½W
+		char boneName[20];//ƒ{[ƒ“–¼
+		unsigned short parentNo;//eƒ{[ƒ“”Ô†
+		unsigned short nextNo;//æ’[‚Ìƒ{[ƒ“”Ô†
+		unsigned char type;//ƒ{[ƒ“í•Ê
+		unsigned short ikBoneNo;//IKƒ{[ƒ“”Ô†
+		XMFLOAT3 pos;//ƒ{[ƒ“‚ÌŠî€“_À•W
 	};
 #pragma pack()
 
-	//ï¿½{ï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½Ìæ“¾
+	//ƒ{[ƒ“”‚Ìæ“¾
 	unsigned short boneNum = 0;
 	fread(&boneNum, sizeof(boneNum), 1, fp);
 
-	//ï¿½{ï¿½[ï¿½ï¿½ï¿½fï¿½[ï¿½^ï¿½Ìæ“¾
+	//ƒ{[ƒ“ƒf[ƒ^‚Ìæ“¾
 	vector<PMDBone> bones(boneNum);
 	fread(bones.data(), bones.size() * sizeof(PMDBone), 1, fp);
 
 	fclose(fp);
 
-	//ï¿½fï¿½[ï¿½^ï¿½ÌƒRï¿½sï¿½[
-	//ï¿½ï¿½ï¿½_ï¿½fï¿½[ï¿½^
+	//ƒf[ƒ^‚ÌƒRƒs[
+	//’¸“_ƒf[ƒ^
 	for (int i = 0; i < pVertNum; i++) {
 		_vertData[i].pos = vertData[i].pos;
 		_vertData[i].normal = vertData[i].normal;
@@ -216,10 +216,10 @@ HRESULT PMDActor::LoadPMDFile() {
 		_vertData[i].boneWeight = vertData[i].boneWeight;
 	}
 
-	//ï¿½Cï¿½ï¿½ï¿½fï¿½bï¿½Nï¿½Xï¿½fï¿½[ï¿½^
+	//ƒCƒ“ƒfƒbƒNƒXƒf[ƒ^
 	copy(indices.begin(), indices.end(), _indices);
 
-	//ï¿½}ï¿½eï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½fï¿½[ï¿½^
+	//ƒ}ƒeƒŠƒAƒ‹ƒf[ƒ^
 	for (int i = 0; i < pMaterialNum; i++) {
 		_materials[i].material.diffuse = materials[i].diffuse;
 		_materials[i].material.alpha = materials[i].alpha;
@@ -237,9 +237,9 @@ HRESULT PMDActor::LoadPMDFile() {
 		}
 	}
 
-	//ï¿½{ï¿½[ï¿½ï¿½ï¿½fï¿½[ï¿½^
-	vector<string> boneNames(pBoneNum);//ï¿½Cï¿½ï¿½ï¿½fï¿½bï¿½Nï¿½Xï¿½Æ–ï¿½ï¿½Oï¿½ÌŠÖŒWï¿½\ï¿½zï¿½p
-	//ï¿½{ï¿½[ï¿½ï¿½ï¿½mï¿½[ï¿½hï¿½}ï¿½bï¿½vï¿½ï¿½ï¿½ï¿½ï¿½
+	//ƒ{[ƒ“ƒf[ƒ^
+	vector<string> boneNames(pBoneNum);//ƒCƒ“ƒfƒbƒNƒX‚Æ–¼‘O‚ÌŠÖŒW\’z—p
+	//ƒ{[ƒ“ƒm[ƒhƒ}ƒbƒv‚ğì‚é
 	for (int i = 0; i < pBoneNum; i++) {
 		auto& b = bones[i];
 		boneNames[i] = b.boneName;
@@ -247,9 +247,9 @@ HRESULT PMDActor::LoadPMDFile() {
 		node.boneIdx = i;
 		node.startPos = b.pos;
 	}
-	//ï¿½eï¿½qï¿½ÖŒWï¿½ï¿½ï¿½\ï¿½zï¿½ï¿½ï¿½ï¿½
+	//eqŠÖŒW‚ğ\’z‚·‚é
 	for (auto& b : bones) {
-		//ï¿½eï¿½Cï¿½ï¿½ï¿½fï¿½bï¿½Nï¿½Xï¿½ï¿½ï¿½`ï¿½Fï¿½bï¿½N
+		//eƒCƒ“ƒfƒbƒNƒX‚ğƒ`ƒFƒbƒN
 		if (b.parentNo >= pBoneNum) {
 			continue;
 		}
@@ -269,33 +269,33 @@ void PMDActor::RecursiveMatrixMultipy(BoneNode* node, XMMATRIX& mat) {
 }
 
 void PMDActor::SetLeg() {
-	//ï¿½pï¿½xï¿½Ìï¿½ï¿½ï¿½ï¿½ï¿½
+	//Šp“x‚Ì‰Šú‰»
 	_theta = { 0.0f, 0.0f, 0.0f };
 
-	//ï¿½ï¿½ï¿½ï¿½
+	//¶‘«
 	if (_isLeftLeg) {
-		//ï¿½{ï¿½[ï¿½ï¿½ï¿½Ìİ’ï¿½
-		_legNode = _boneNodeTable["ï¿½ï¿½ï¿½ï¿½"];
-		_kneeNode = _boneNodeTable["ï¿½ï¿½ï¿½Ğ‚ï¿½"];
-		_ankleNode = _boneNodeTable["ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"];
+		//ƒ{[ƒ“‚Ìİ’è
+		_legNode = _boneNodeTable["¶‘«"];
+		_kneeNode = _boneNodeTable["¶‚Ğ‚´"];
+		_ankleNode = _boneNodeTable["¶‘«ñ"];
 
-		//ï¿½ï¿½ï¿½ÌˆÊ’uï¿½æ“¾
+		//‘«‚ÌˆÊ’uæ“¾
 		_rootPos = AddVector(_defPos, _legNode.startPos);
 	}
-	//ï¿½Eï¿½ï¿½
+	//‰E‘«
 	else {
-		//ï¿½{ï¿½[ï¿½ï¿½ï¿½Ìİ’ï¿½
-		_legNode = _boneNodeTable["ï¿½Eï¿½ï¿½"];
-		_kneeNode = _boneNodeTable["ï¿½Eï¿½Ğ‚ï¿½"];
-		_ankleNode = _boneNodeTable["ï¿½Eï¿½ï¿½ï¿½ï¿½"];
+		//ƒ{[ƒ“‚Ìİ’è
+		_legNode = _boneNodeTable["‰E‘«"];
+		_kneeNode = _boneNodeTable["‰E‚Ğ‚´"];
+		_ankleNode = _boneNodeTable["‰E‘«ñ"];
 
-		//ï¿½ï¿½ï¿½ÌˆÊ’uï¿½æ“¾
+		//‘«‚ÌˆÊ’uæ“¾
 		_rootPos = AddVector(_defPos, _legNode.startPos);
 	}
 }
 
 void PMDActor::RotateLeg(XMFLOAT3 legTheta, XMFLOAT3 kneeTheta, XMFLOAT3 ankleTheta) {
-	//ï¿½ï¿½
+	//‘«
 	auto& legPos = _legNode.startPos;
 	auto legMat = XMMatrixTranslation(-legPos.x, -legPos.y, -legPos.z);
 	legMat *= XMMatrixRotationX(legTheta.x);
@@ -303,7 +303,7 @@ void PMDActor::RotateLeg(XMFLOAT3 legTheta, XMFLOAT3 kneeTheta, XMFLOAT3 ankleTh
 	legMat *= XMMatrixRotationZ(legTheta.z);
 	legMat *= XMMatrixTranslation(legPos.x, legPos.y, legPos.z);
 
-	//ï¿½Ğ‚ï¿½
+	//‚Ğ‚´
 	auto& kneePos = _kneeNode.startPos;
 	auto kneeMat = XMMatrixTranslation(-kneePos.x, -kneePos.y, -kneePos.z);
 	kneeMat *= XMMatrixRotationX(kneeTheta.x);
@@ -311,7 +311,7 @@ void PMDActor::RotateLeg(XMFLOAT3 legTheta, XMFLOAT3 kneeTheta, XMFLOAT3 ankleTh
 	kneeMat *= XMMatrixRotationZ(kneeTheta.z);
 	kneeMat *= XMMatrixTranslation(kneePos.x, kneePos.y, kneePos.z);
 
-	//ï¿½ï¿½ï¿½ï¿½
+	//‘«ñ
 	auto& anklePos = _ankleNode.startPos;
 	auto ankleMat = XMMatrixTranslation(-anklePos.x, -anklePos.y, -anklePos.z);
 	ankleMat *= XMMatrixRotationX(ankleTheta.x);
@@ -323,7 +323,7 @@ void PMDActor::RotateLeg(XMFLOAT3 legTheta, XMFLOAT3 kneeTheta, XMFLOAT3 ankleTh
 	_boneMatrices[_kneeNode.boneIdx] = kneeMat;
 	_boneMatrices[_ankleNode.boneIdx] = ankleMat;
 
-	//ï¿½Sï¿½Ì‚É”ï¿½ï¿½f
+	//‘S‘Ì‚É”½‰f
 	XMMATRIX mat = XMMatrixIdentity();
-	RecursiveMatrixMultipy(&_boneNodeTable["ï¿½Zï¿½ï¿½ï¿½^ï¿½["], mat);
+	RecursiveMatrixMultipy(&_boneNodeTable["ƒZƒ“ƒ^["], mat);
 }
