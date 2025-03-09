@@ -17,15 +17,15 @@ void Face::Init() {
 }
 
 void Face::Begin() {
-	//Še•Ï”‚Ì‰Šú‰»
+	//ï¿½eï¿½Ïï¿½ï¿½Ìï¿½ï¿½ï¿½ï¿½ï¿½
 	_moveMat = XMMatrixIdentity();
 	_mv = { 0.0f, 0.0f, 0.0f };
 
-	//‘«‚ÌƒZƒbƒg
+	//ï¿½ï¿½ï¿½ÌƒZï¿½bï¿½g
 	_isLeftLeg = true;
 	SetLeg();
 	
-	//À•W‚ğ“n‚·
+	//ï¿½ï¿½ï¿½Wï¿½ï¿½nï¿½ï¿½
 	PassVertexValue();
 }
 
@@ -33,14 +33,14 @@ void Face::Update(float deltaTime, einput_state state, XMFLOAT3 rotCenter) {
 	XMFLOAT3 move = { 0.0f, 0.0f, 0.0f };
 	XMFLOAT3 rot = { 0.0f, 0.0f, 0.0f };
 
-	//“ü—Íˆ—
+	//ï¿½ï¿½ï¿½Íï¿½ï¿½ï¿½
 	switch (state)
 	{
 	case move_up:
-		move.z = _v * deltaTime;
+		move.y = _v * deltaTime;
 		break;
 	case move_down:
-		move.z = -_v * deltaTime;
+		move.y = -_v * deltaTime;
 		break;
 	case move_right:
 		move.x = _v * deltaTime;
@@ -74,19 +74,19 @@ void Face::Update(float deltaTime, einput_state state, XMFLOAT3 rotCenter) {
 		break;
 	}
 
-	//Œ´“_‚ÉˆÚ“®
+	//ï¿½ï¿½ï¿½_ï¿½ÉˆÚ“ï¿½
 	_worldMat *= XMMatrixTranslation(-_mv.x, -_mv.y, -_mv.z);
 	_worldMat *= XMMatrixTranslation(-rotCenter.x, -rotCenter.y, -rotCenter.z);
-	//‰ñ“]
+	//ï¿½ï¿½]
 	_worldMat *= XMMatrixRotationZ(rot.z);
-	//ˆÚ“®‚µ‚½•ª‚ğ–ß‚·
+	//ï¿½Ú“ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß‚ï¿½
 	_worldMat *= XMMatrixTranslation(rotCenter.x, rotCenter.y, rotCenter.z);
 	_worldMat *= XMMatrixTranslation(_mv.x, _mv.y, _mv.z);
 	for (int i = 0; i < fVertNum; i++) {
 		_vertices[i] = RotateVector(rot, AddVector(_mv, rotCenter), _vertices[i]);
 	}
 
-	//ˆÚ“®
+	//ï¿½Ú“ï¿½
 	_worldMat *= XMMatrixTranslation(move.x, move.y, move.z);
 	_moveMat *= XMMatrixTranslation(move.x, move.y, move.z);
 	for (int i = 0; i < fVertNum; i++) {
@@ -94,7 +94,7 @@ void Face::Update(float deltaTime, einput_state state, XMFLOAT3 rotCenter) {
 	}
 	_mv = AddVector(_mv, move);
 
-	//À•W‚ğ“n‚·
+	//ï¿½ï¿½ï¿½Wï¿½ï¿½nï¿½ï¿½
 	PassVertexValue();
 }
 
@@ -110,7 +110,7 @@ void Face::CreateFace() {
 	const float dx = (2 * _w) / colNum;
 	const float dz = (2 * _h) / rowNum;
 
-	//’¸“_À•W‚Ìİ’è
+	//ï¿½ï¿½ï¿½_ï¿½ï¿½ï¿½Wï¿½Ìİ’ï¿½
 	int index = 0;
 	for (int row = 0; row <= rowNum; row++) {
 		for (int col = 0; col <= colNum; col++) {
@@ -122,7 +122,7 @@ void Face::CreateFace() {
 		}
 	}
 
-	//ƒCƒ“ƒfƒbƒNƒX‚Ìİ’è
+	//ï¿½Cï¿½ï¿½ï¿½fï¿½bï¿½Nï¿½Xï¿½Ìİ’ï¿½
 	index = 0;
 	for (int row = 0; row < rowNum; row++) {
 		for (int col = 0; col < colNum; col++) {
@@ -149,42 +149,42 @@ void Face::CreateFace() {
 }
 
 void Face::SetLeg() {
-	//Še•Ï”‚Ì‰Šú‰»
+	//ï¿½eï¿½Ïï¿½ï¿½Ìï¿½ï¿½ï¿½ï¿½ï¿½
 	_worldMat = XMMatrixIdentity();
 	CreateFace();
 	_theta = { 0.0f, 0.0f, 0.0f };
 
-	XMFLOAT3 origin = { 0.0f, 0.0f, 0.0f };//Œ´“_
+	XMFLOAT3 origin = { 0.0f, 0.0f, 0.0f };//ï¿½ï¿½ï¿½_
 
-	//¶‘«
+	//ï¿½ï¿½ï¿½ï¿½
 	if (_isLeftLeg) {
-		//‰ñ“]‚Ìİ’è
+		//ï¿½ï¿½]ï¿½Ìİ’ï¿½
 		_worldMat *= XMMatrixRotationZ(_defLeftRot.z);
 		for (int i = 0; i < fVertNum; i++) {
 			_vertices[i] = RotateVector(_defLeftRot, origin, _vertices[i]);
 		}
 
-		//À•W‚Ìİ’è
+		//ï¿½ï¿½ï¿½Wï¿½Ìİ’ï¿½
 		_worldMat *= XMMatrixTranslation(_defLeftPos.x, _defLeftPos.y, _defLeftPos.z);
 		for (int i = 0; i < fVertNum; i++) {
 			_vertices[i] = AddVector(_vertices[i], _defLeftPos);
 		}
 	}
-	//‰E‘«
+	//ï¿½Eï¿½ï¿½
 	else {
-		//‰ñ“]‚Ìİ’è
+		//ï¿½ï¿½]ï¿½Ìİ’ï¿½
 		_worldMat *= XMMatrixRotationZ(_defRightRot.z);
 		for (int i = 0; i < fVertNum; i++) {
 			_vertices[i] = RotateVector(_defRightRot, origin, _vertices[i]);
 		}
 
-		//À•W‚Ìİ’è
+		//ï¿½ï¿½ï¿½Wï¿½Ìİ’ï¿½
 		_worldMat *= XMMatrixTranslation(_defRightPos.x, _defRightPos.y, _defRightPos.z);
 		for (int i = 0; i < fVertNum; i++) {
 			_vertices[i] = AddVector(_vertices[i], _defRightPos);
 		}
 	}
-	//ˆÚ“®•ª‚ğ”½‰f
+	//ï¿½Ú“ï¿½ï¿½ï¿½ï¿½ğ”½‰f
 	_worldMat *= _moveMat;
 	for (int i = 0; i < fVertNum; i++) {
 		_vertices[i] = AddVector(_vertices[i], _mv);
