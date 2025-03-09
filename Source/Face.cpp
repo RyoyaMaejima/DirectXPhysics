@@ -1,138 +1,101 @@
 #include "Face.h"
 #include "XMFLOAT3Math.h"
 
-#include <random>
-#include <cmath>
-
 Face& Face::Instance() {
 	static Face instance;
 	return instance;
 }
 
-void Face::Init(Vertex* vertices, unsigned int* indices) {
+void Face::Init() {
 	CreateFace();
 
-	CopyVertex(vertices);
-	copy(begin(_indices), end(_indices), indices);
+	PassVertexValue();
+
+	for (int i = 0; i < fVertNum; i++) {
+		_vertData[i].id = face_id;
+	}
 }
 
-void Face::Begin(XMMATRIX& worldMat, Vertex* vertices) {
+void Face::Begin() {
 	//各変数の初期化
-	worldMat = XMMatrixIdentity();
-	CreateFace();
-	center = { 0.0f, 0.0f, 0.0f };
-	xTheta = 0.0f;
+	_moveMat = XMMatrixIdentity();
+	_mv = { 0.0f, 0.0f, 0.0f };
 
-	XMFLOAT3 pos = { 0.0f, -2.0f, 0.0f };
-	float xPos = XM_PIDIV2;
-
-	//-π/4～π/4までのランダムな値を設定
-	random_device rd;
-	mt19937 gen(rd());
-	uniform_real_distribution<float> dist(-XM_PIDIV4, XM_PIDIV4);
-	float zPos = dist(gen);
-	zTheta = zPos;
-
-	//回転の初期設定
-	worldMat *= XMMatrixRotationX(xPos);
-	for (int i = 0; i < fVertNum; i++) {
-		_vertices[i] = RotateXVector(xPos, _vertices[i]);
-	}
-	worldMat *= XMMatrixRotationZ(zPos);
-	for (int i = 0; i < fVertNum; i++) {
-		_vertices[i] = RotateZVector(zPos, _vertices[i]);
-	}
-
-	//座標の初期設定
-	worldMat *= XMMatrixTranslation(pos.x, pos.y, pos.z);
-	for (int i = 0; i < fVertNum; i++) {
-		_vertices[i] = AddVector(_vertices[i], pos);
-	}
-
+	//足のセット
+	_isLeftLeg = true;
+	SetLeg();
+	
 	//座標を渡す
-	CopyVertex(vertices);
-	center = AddVector(center, pos);
+	PassVertexValue();
 }
 
-void Face::Update(float deltaTime, einput_state state, XMMATRIX& worldMat, Vertex* vertices) {
+void Face::Update(float deltaTime, einput_state state, XMFLOAT3 rotCenter) {
 	XMFLOAT3 move = { 0.0f, 0.0f, 0.0f };
-	float xMove = 0.0f;
-	float zMove = 0.0f;
+	XMFLOAT3 rot = { 0.0f, 0.0f, 0.0f };
 
 	//入力処理
 	switch (state)
 	{
-		case move_up:
-			move.z = v * deltaTime;
-			break;
-		case move_down:
-			move.z = -v * deltaTime;
-			break;
-		case move_right:
-			move.x = v * deltaTime;
-			break;
-		case move_left:
-			move.x = -v * deltaTime;
-			break;
-		case rotateX_positive:
-			if (xTheta < limTheta) {
-				xMove = rv * deltaTime;
-				xTheta += xMove;
-			}
-			break;
-		case rotateX_negative:
-			if (xTheta > -limTheta) {
-				xMove = -rv * deltaTime;
-				xTheta += xMove;
-			}
-			break;
-		case rotateZ_positive:
-			if (zTheta > -limTheta) {
-				zMove = -rv * deltaTime;
-				zTheta += zMove;
-			}
-			break;
-		case rotateZ_negative:
-			if (zTheta < limTheta) {
-				zMove = rv * deltaTime;
-				zTheta += zMove;
-			}
-			break;
-		case invalid:
-			break;
-		default:
-			break;
+	case move_up:
+		move.z = _v * deltaTime;
+		break;
+	case move_down:
+		move.z = -_v * deltaTime;
+		break;
+	case move_right:
+		move.x = _v * deltaTime;
+		break;
+	case move_left:
+		move.x = -_v * deltaTime;
+		break;
+	case change_leg:
+		if (!_isPut) {
+			_isLeftLeg = !_isLeftLeg;
+			_isPut = true;
+			SetLeg();
+		}
+		break;
+	case rotateZ_positive:
+		if (_theta.z < _limTheta) {
+			rot.z = _rv * deltaTime;
+			_theta.z += rot.z;
+		}
+		break;
+	case rotateZ_negative:
+		if (_theta.z > -_limTheta) {
+			rot.z = -_rv * deltaTime;
+			_theta.z += rot.z;
+		}
+		break;
+	case invalid:
+		_isPut = false;
+		break;
+	default:
+		break;
 	}
 
 	//原点に移動
-	worldMat *= XMMatrixTranslation(-center.x, -center.y, -center.z);
-	for (int i = 0; i < fVertNum; i++) {
-		_vertices[i] = AddVector(_vertices[i], ScalarVecror(-1.0f, center));
-	}
+	_worldMat *= XMMatrixTranslation(-_mv.x, -_mv.y, -_mv.z);
+	_worldMat *= XMMatrixTranslation(-rotCenter.x, -rotCenter.y, -rotCenter.z);
 	//回転
-	worldMat *= XMMatrixRotationX(xMove);
-	for (int i = 0; i < fVertNum; i++) {
-		_vertices[i] = RotateXVector(xMove, _vertices[i]);
-	}
-	worldMat *= XMMatrixRotationZ(zMove);
-	for (int i = 0; i < fVertNum; i++) {
-		_vertices[i] = RotateZVector(zMove, _vertices[i]);
-	}
+	_worldMat *= XMMatrixRotationZ(rot.z);
 	//移動した分を戻す
-	worldMat *= XMMatrixTranslation(center.x, center.y, center.z);
+	_worldMat *= XMMatrixTranslation(rotCenter.x, rotCenter.y, rotCenter.z);
+	_worldMat *= XMMatrixTranslation(_mv.x, _mv.y, _mv.z);
 	for (int i = 0; i < fVertNum; i++) {
-		_vertices[i] = AddVector(_vertices[i], center);
+		_vertices[i] = RotateVector(rot, AddVector(_mv, rotCenter), _vertices[i]);
 	}
 
 	//移動
-	worldMat *= XMMatrixTranslation(move.x, move.y, move.z);
+	_worldMat *= XMMatrixTranslation(move.x, move.y, move.z);
+	_moveMat *= XMMatrixTranslation(move.x, move.y, move.z);
 	for (int i = 0; i < fVertNum; i++) {
 		_vertices[i] = AddVector(_vertices[i], move);
 	}
+	_mv = AddVector(_mv, move);
 
 	//座標を渡す
-	CopyVertex(vertices);
-	center = AddVector(center, move);
+	PassVertexValue();
 }
 
 Face::Face() {
@@ -144,25 +107,22 @@ Face::~Face() {
 }
 
 void Face::CreateFace() {
-	const float dx = (2 * w) / colNum;
-	const float dy = (2 * w) / rowNum;
+	const float dx = (2 * _w) / colNum;
+	const float dz = (2 * _h) / rowNum;
 
 	//頂点座標の設定
 	int index = 0;
 	for (int row = 0; row <= rowNum; row++) {
 		for (int col = 0; col <= colNum; col++) {
-			float x = -w + col * dx;
-			float y = -w + row * dy;
-			_vertices[index] = { x, y, 0.0f };
-
-			//法線ベクトルの設定
-			_normals[index] = { 0.0f, 0.0f, -1.0f };
+			float x = -_w + col * dx;
+			float z = -_w + row * dz;
+			_vertices[index] = { x, 0.0f, z };
 
 			index++;
 		}
 	}
 
-	//インデックス座標の設定
+	//インデックスの設定
 	index = 0;
 	for (int row = 0; row < rowNum; row++) {
 		for (int col = 0; col < colNum; col++) {
@@ -188,9 +148,51 @@ void Face::CreateFace() {
 	}
 }
 
-void Face::CopyVertex(Vertex* vertices) {
+void Face::SetLeg() {
+	//各変数の初期化
+	_worldMat = XMMatrixIdentity();
+	CreateFace();
+	_theta = { 0.0f, 0.0f, 0.0f };
+
+	XMFLOAT3 origin = { 0.0f, 0.0f, 0.0f };//原点
+
+	//左足
+	if (_isLeftLeg) {
+		//回転の設定
+		_worldMat *= XMMatrixRotationZ(_defLeftRot.z);
+		for (int i = 0; i < fVertNum; i++) {
+			_vertices[i] = RotateVector(_defLeftRot, origin, _vertices[i]);
+		}
+
+		//座標の設定
+		_worldMat *= XMMatrixTranslation(_defLeftPos.x, _defLeftPos.y, _defLeftPos.z);
+		for (int i = 0; i < fVertNum; i++) {
+			_vertices[i] = AddVector(_vertices[i], _defLeftPos);
+		}
+	}
+	//右足
+	else {
+		//回転の設定
+		_worldMat *= XMMatrixRotationZ(_defRightRot.z);
+		for (int i = 0; i < fVertNum; i++) {
+			_vertices[i] = RotateVector(_defRightRot, origin, _vertices[i]);
+		}
+
+		//座標の設定
+		_worldMat *= XMMatrixTranslation(_defRightPos.x, _defRightPos.y, _defRightPos.z);
+		for (int i = 0; i < fVertNum; i++) {
+			_vertices[i] = AddVector(_vertices[i], _defRightPos);
+		}
+	}
+	//移動分を反映
+	_worldMat *= _moveMat;
 	for (int i = 0; i < fVertNum; i++) {
-		vertices[i].pos = _vertices[i];
-		vertices[i].normal = _normals[i];
+		_vertices[i] = AddVector(_vertices[i], _mv);
+	}
+}
+
+void Face::PassVertexValue() {
+	for (int i = 0; i < fVertNum; i++) {
+		_vertData[i].pos = _vertices[i];
 	}
 }

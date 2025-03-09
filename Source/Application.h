@@ -1,9 +1,7 @@
 #pragma once
 #include <Windows.h>
 #include <tchar.h>
-#include <d3d12.h>
 #include <dxgi1_6.h>
-#include <map>
 #include <d3dcompiler.h>
 #include <DirectXTex.h>
 #include <d3dx12.h>
@@ -11,6 +9,7 @@
 
 #include "Sphere.h"
 #include "Face.h"
+#include "PMDActor.h"
 
 using namespace Microsoft::WRL;
 
@@ -60,13 +59,14 @@ private:
 
 	//頂点関係
 	//球
-	Vertex _sVertices[sVertNum] = {};//頂点座標
 	ComPtr<ID3D12Resource> _sVertBuff = nullptr;//頂点バッファー
 	D3D12_VERTEX_BUFFER_VIEW _sVbView = {};//頂点バッファービュー
 	//面
-	Vertex _fVertices[fVertNum] = {};//頂点座標
 	ComPtr<ID3D12Resource> _fVertBuff = nullptr;//頂点バッファー
 	D3D12_VERTEX_BUFFER_VIEW _fVbView = {};//頂点バッファービュー
+	//PMDアクター
+	ComPtr<ID3D12Resource> _pVertBuff = nullptr;//頂点バッファー
+	D3D12_VERTEX_BUFFER_VIEW _pVbView = {};//頂点バッファービュー
 
 	//シェーダーオブジェクト
 	ComPtr<ID3DBlob> _vsBlob = nullptr;
@@ -84,24 +84,28 @@ private:
 
 	//インデックス関係
 	//球
-	unsigned int _sIndices[sIndicesNum] = {};//インデックス座標
 	ComPtr<ID3D12Resource> _sIdxBuff = nullptr;//インデックスバッファー
 	D3D12_INDEX_BUFFER_VIEW _sIbView = {};;//インデックスバッファービュー
 	//面
-	unsigned int _fIndices[fIndicesNum] = {};//インデックス座標
 	ComPtr<ID3D12Resource> _fIdxBuff = nullptr;//インデックスバッファー
 	D3D12_INDEX_BUFFER_VIEW _fIbView = {};;//インデックスバッファービュー
+	//PMDアクター
+	ComPtr<ID3D12Resource> _pIdxBuff = nullptr;//インデックスバッファー
+	D3D12_INDEX_BUFFER_VIEW _pIbView = {};;//インデックスバッファービュー
 
 	//テクスチャ関係
-	Vertex _tVertices[tVertNum] = {};//頂点座標
+	float _tw = 2.0f;//縦の長さの半分
+	XMFLOAT3 _tDefPos = { 12.0f, 8.0f, 0.0f };
+	Vertex _tVertData[tVertNum] = {};//頂点座標
 	ComPtr<ID3D12Resource> _tVertBuff = nullptr;//頂点バッファー
 	D3D12_VERTEX_BUFFER_VIEW _tVbView = {};//頂点バッファービュー
 	unsigned int _tIndices[tIndicesNum] = {};//インデックス座標
 	ComPtr<ID3D12Resource> _tIdxBuff = nullptr;//インデックスバッファー
 	D3D12_INDEX_BUFFER_VIEW _tIbView = {};;//インデックスバッファービュー
 
-	TexMetadata _metadata = {};//メタデータ
 	ComPtr<ID3D12Resource> _texBuff = nullptr;//テクスチャバッファー
+	vector<ComPtr<ID3D12Resource>> _textureResources;//PMD用テクスチャバッファー
+	ComPtr<ID3D12Resource> _whiteBuff = nullptr;//白テクスチャ
 
 	//定数関係
 	//球
@@ -110,31 +114,37 @@ private:
 	ComPtr<ID3D12Resource> _fConstBuff = nullptr;//定数バッファー
 	//テクスチャ
 	ComPtr<ID3D12Resource> _tConstBuff = nullptr;//定数バッファー
-
-	//テクスチャと定数用ディスクリプタヒープ
-	ComPtr<ID3D12DescriptorHeap> _basicDescHeap = nullptr;
+	//PMDアクター
+	ComPtr<ID3D12Resource> _pConstBuff = nullptr;//定数バッファー
 
 	//座標変換系行列
 	struct MatricesData {
 		XMMATRIX world;
 		XMMATRIX viewproj;
 	};
-
 	//球
-	XMMATRIX _sWorldMat;
 	MatricesData* _sMapMatrix;
-
 	//面
-	XMMATRIX _fWorldMat;
 	MatricesData* _fMapMatrix;
-
 	//テクスチャ
-	XMMATRIX _tWorldMat;
+	XMMATRIX _tWorldMat = XMMatrixIdentity();
 	MatricesData* _tMapMatrix;
+	//PMDアクター
+	MatricesData* _pMapMatrix;
 
 	//深度関係
 	ComPtr<ID3D12Resource> _depthBuff = nullptr;//深度バッファー
 	ComPtr<ID3D12DescriptorHeap> _dsvHeap = nullptr;//深度バッファ用ディスクリプタヒープ
+
+	//マテリアル関係
+	ComPtr<ID3D12Resource> _pMaterialBuff = nullptr;//マテリアルバッファー
+
+	//ボーン関係
+	ComPtr<ID3D12Resource> _pBoneBuff = nullptr;//ボーンバッファー
+	XMMATRIX* _mappedMatrices = nullptr;
+
+	//テクスチャ、定数、マテリアル、ボーン用ディスクリプタヒープ
+	ComPtr<ID3D12DescriptorHeap> _basicDescHeap = nullptr;
 
 	//時間計測用
 	LARGE_INTEGER _frequency;//周波数
@@ -146,6 +156,9 @@ private:
 
 	//面
 	Face _face;
+
+	//PMDアクター
+	PMDActor _pmdActor;
 
 	//入力変数
 	einput_state _state;
@@ -187,7 +200,13 @@ private:
 	HRESULT CreateRootSignature();
 
 	//テクスチャファイル読み込み
-	HRESULT LoadTextureFile();
+	ID3D12Resource* LoadTextureFile(bool isIns, string& texPath);
+
+	//白テクスチャ作成
+	ID3D12Resource* CreateWhiteTexture();
+
+	//テクスチャバッファー作成
+	HRESULT CreateTextureBuffer();
 
 	//定数バッファー作成
 	HRESULT CreateConstBuffer(
@@ -196,11 +215,17 @@ private:
 		XMMATRIX& worldMat
 	);
 
-	//テクスチャと定数用ディスクリプタヒープ作成
-	HRESULT CreateBasicDescHeap();
-
 	//深度バッファービュー作成
 	HRESULT CreateDepthStencilView();
+
+	//マテリアルバッファー作成
+	HRESULT CreateMaterialBuffer();
+
+	//ボーンバッファー作成
+	HRESULT CreateBoneBuffer();
+
+	//ディスクリプタヒープ作成
+	HRESULT CreateBasicDescHeap();
 
 	//頂点データの初期化
 	void InitiallizeVertexData();

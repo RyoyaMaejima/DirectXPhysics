@@ -6,28 +6,28 @@ Sphere& Sphere::Instance() {
 	return instance;
 }
 
-void Sphere::Init(Vertex* vertices, unsigned int* indices) {
+void Sphere::Init() {
 	CreateSphere();
 
-	CopyVertex(vertices);
-	copy(begin(_indices), end(_indices), indices);
+	PassVertexValue();
+
+	for (int i = 0; i < sVertNum; i++) {
+		_vertData[i].id = sphere_id;
+	}
 }
 
-void Sphere::Begin(XMMATRIX& worldMat) {
+void Sphere::Begin() {
 	//各変数の初期化
-	worldMat = XMMatrixIdentity();
-	CreateSphere();
-	center = { 0.0f, 0.0f, 0.0f };
-	v = { 0.0f, 0.0f, 0.0f };
-
-	XMFLOAT3 pos = { 0.0f, 4.0f, 0.0f };
+	_worldMat = XMMatrixIdentity();
+	_center = { 0.0f, 0.0f, 0.0f };
+	_v = { 0.0f, 0.0f, 0.0f };
 
 	//座標の初期設定
-	worldMat *= XMMatrixTranslation(pos.x, pos.y, pos.z);
-	center = AddVector(center, pos);
+	_worldMat *= XMMatrixTranslation(_defPos.x, _defPos.y, _defPos.z);
+	_center = AddVector(_center, _defPos);
 }
 
-void Sphere::Update(float deltaTime, XMMATRIX& worldMat, Vertex* fVertices) {
+void Sphere::Update(float deltaTime, Vertex* fVertices) {
 	XMFLOAT3 move = { 0.0f, 0.0f, 0.0f };
 
 	//面の座標を受け取る
@@ -41,9 +41,9 @@ void Sphere::Update(float deltaTime, XMMATRIX& worldMat, Vertex* fVertices) {
 		Bound();
 
 		//めり込んだ分の位置調整
-		XMFLOAT3 dir = ScalarVecror(PenDepth(), NormalizeVector(v));
-		worldMat *= XMMatrixTranslation(dir.x, dir.y, dir.z);
-		center = AddVector(center, dir);
+		XMFLOAT3 dir = ScalarVecror(PenDepth(), NormalizeVector(_v));
+		_worldMat *= XMMatrixTranslation(dir.x, dir.y, dir.z);
+		_center = AddVector(_center, dir);
 	}
 	//ぶつかってないとき
 	else {
@@ -51,11 +51,11 @@ void Sphere::Update(float deltaTime, XMMATRIX& worldMat, Vertex* fVertices) {
 		Fall();
 	}
 
-	move = ScalarVecror(deltaTime, v);
+	move = ScalarVecror(deltaTime, _v);
 
 	//座標に反映
-	worldMat *= XMMatrixTranslation(move.x, move.y, move.z);
-	center = AddVector(center, move);
+	_worldMat *= XMMatrixTranslation(move.x, move.y, move.z);
+	_center = AddVector(_center, move);
 }
 
 Sphere::Sphere() {
@@ -71,24 +71,31 @@ void Sphere::CreateSphere() {
 
 	//頂点座標の設定
 	int index = 0;
-	for(int lat = 0; lat <= latiNum; lat++) {
+	for (int lat = 0; lat <= latiNum; lat++) {
 		float latTheta = lat * PI / latiNum;
 		for (int lon = 0; lon < longNum; lon++) {
 			float lonTheta = lon * 2 * PI / longNum;
 
-			float x = r * static_cast<float>(sin(latTheta) * cos(lonTheta));
-			float y = r * static_cast<float>(cos(latTheta));
-			float z = r * static_cast<float>(sin(latTheta) * sin(lonTheta));
+			float x = _r * static_cast<float>(sin(latTheta) * cos(lonTheta));
+			float y = _r * static_cast<float>(cos(latTheta));
+			float z = _r * static_cast<float>(sin(latTheta) * sin(lonTheta));
 			_vertices[index] = { x, y, z };
 
 			//法線ベクトルの設定
 			_normals[index] = NormalizeVector(_vertices[index]);
 
+			if (fmod(sin(_vertices[index].x * 10) + cos(_vertices[index].z * 10), 2.0f) > 1.0f) {
+				_colors[index] = { 0.0f, 0.0f, 0.0f };//黒
+			}
+			else {
+				_colors[index] = { 1.0f, 1.0f, 1.0f };//白
+			}
+
 			index++;
 		}
 	}
 
-	//インデックス座標の設定
+	//インデックスの設定
 	index = 0;
 	for (int lat = 0; lat < latiNum; lat++) {
 		for (int lon = 0; lon < longNum; lon++) {
@@ -112,26 +119,27 @@ void Sphere::CreateSphere() {
 	}
 }
 
-void Sphere::CopyVertex(Vertex* vertices) {
+void Sphere::PassVertexValue() {
 	for (int i = 0; i < sVertNum; i++) {
-		vertices[i].pos = _vertices[i];
-		vertices[i].normal = _normals[i];
+		_vertData[i].pos = _vertices[i];
+		_vertData[i].normal = _normals[i];
+		_vertData[i].color = _colors[i];
 	}
 }
 
 bool Sphere::Collision() {
 	bool isEdge = false;
-	XMFLOAT3 vfnp = CalcFaceNearestPoint(center, _fCorners[0], _fCorners[1], _fCorners[2], _fCorners[3], isEdge);//最近点を取得
-	return CalcDistance(center,vfnp) <= r;
+	XMFLOAT3 vfnp = CalcFaceNearestPoint(_center, _fCorners[0], _fCorners[1], _fCorners[2], _fCorners[3], isEdge);//最近点を取得
+	return CalcDistance(_center, vfnp) <= _r;
 }
 
 void Sphere::Fall() {
-	v.y -= g;
+	_v.y -= _g;
 }
 
 void Sphere::Bound() {
 	bool isEdge = false;
-	XMFLOAT3 vfnp = CalcFaceNearestPoint(center, _fCorners[0], _fCorners[1], _fCorners[2], _fCorners[3], isEdge);//最近点を取得
+	XMFLOAT3 vfnp = CalcFaceNearestPoint(_center, _fCorners[0], _fCorners[1], _fCorners[2], _fCorners[3], isEdge);//最近点を取得
 	XMFLOAT3 n;//衝突の法線ベクトル
 
 	//面に衝突したとき
@@ -142,24 +150,24 @@ void Sphere::Bound() {
 	}
 	//辺や角に衝突したとき
 	else {
-		n = SubVector(center, vfnp);//衝突点から中心への方向ベクトル
+		n = SubVector(_center, vfnp);//衝突点から中心への方向ベクトル
 	}
 
 	XMFLOAT3 norN = NormalizeVector(n);//法線ベクトルの正規化
 
 	//速度を面の法線成分と接戦成分に分解
-	XMFLOAT3 vN = ScalarVecror(DotVector(v, norN), norN);//法線成分
-	XMFLOAT3 vT = SubVector(v, vN);//接線成分
+	XMFLOAT3 vN = ScalarVecror(DotVector(_v, norN), norN);//法線成分
+	XMFLOAT3 vT = SubVector(_v, vN);//接線成分
 
 	//衝突後の法線成分を計算
-	vN = ScalarVecror(-e, vN);
+	vN = ScalarVecror(-_e, vN);
 
 	//衝突後の速度を計算
-	v = AddVector(vN, vT);
+	_v = AddVector(vN, vT);
 }
 
 float Sphere::PenDepth() {
 	bool isEdge = false;
-	XMFLOAT3 vfnp = CalcFaceNearestPoint(center, _fCorners[0], _fCorners[1], _fCorners[2], _fCorners[3], isEdge);//最近点を取得
-	return r - CalcDistance(center, vfnp);
+	XMFLOAT3 vfnp = CalcFaceNearestPoint(_center, _fCorners[0], _fCorners[1], _fCorners[2], _fCorners[3], isEdge);//最近点を取得
+	return _r - CalcDistance(_center, vfnp);
 }

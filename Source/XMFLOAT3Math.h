@@ -17,8 +17,14 @@ XMFLOAT3 ScalarVecror(float f, XMFLOAT3 v);
 //x軸中心で回転
 XMFLOAT3 RotateXVector(float theta, XMFLOAT3 v);
 
+//x軸中心で回転
+XMFLOAT3 RotateYVector(float theta, XMFLOAT3 v);
+
 //z軸中心で回転
 XMFLOAT3 RotateZVector(float theta, XMFLOAT3 v);
+
+//中心を設定して回転
+XMFLOAT3 RotateVector(XMFLOAT3 vTheta, XMFLOAT3 center, XMFLOAT3 v);
 
 //ベクトルの大きさ
 float LengthVector(XMFLOAT3 v);

@@ -31,12 +31,32 @@ XMFLOAT3 RotateXVector(float theta, XMFLOAT3 v) {
 	return v;
 }
 
+XMFLOAT3 RotateYVector(float theta, XMFLOAT3 v) {
+	float z = v.z;
+	float x = v.x;
+
+	v.z = z * cos(theta) - x * sin(theta);
+	v.x = z * sin(theta) + x * cos(theta);
+
+	return v;
+}
+
 XMFLOAT3 RotateZVector(float theta, XMFLOAT3 v) {
 	float x = v.x;
 	float y = v.y;
 
 	v.x = x * cos(theta) - y * sin(theta);
 	v.y = x * sin(theta) + y * cos(theta);
+
+	return v;
+}
+
+XMFLOAT3 RotateVector(XMFLOAT3 vTheta, XMFLOAT3 center, XMFLOAT3 v) {
+	v = SubVector(v, center);
+	v = RotateXVector(vTheta.x, v);
+	v = RotateYVector(vTheta.y, v);
+	v = RotateZVector(vTheta.z, v);
+	v = AddVector(v, center);
 
 	return v;
 }
